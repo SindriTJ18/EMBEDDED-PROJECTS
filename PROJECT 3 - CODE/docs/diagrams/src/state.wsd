@@ -1,0 +1,23 @@
+@startuml THIS IS italic
+caption This is caption
+
+
+
+
+rectangle GREEN #lightgreen
+rectangle RED #red
+rectangle YELLOW #Yellow
+
+
+YELLOW -> RED: Timeout
+RED -> GREEN: Command: go
+GREEN -> YELLOW: Command: stop
+
+RED -[hidden]> GREEN
+GREEN -[hidden]-> YELLOW
+
+RED -> RED: Command: stop 
+YELLOW -> YELLOW: Command: stop
+YELLOW <- YELLOW: Command: go
+GREEN -> GREEN: Command: go
+@enduml
