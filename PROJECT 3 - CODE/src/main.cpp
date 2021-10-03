@@ -1,13 +1,17 @@
 #include "Arduino.h"
-#include <avr/delay.h>
+#include <util/delay.h>
+#include <avr/io.h>
+#include <digital_out.h>
 
 void setup()
 {
   Serial.begin(9600);
 }
 
+// GLOBAL INITS
 char command;
 class Context;
+Digital_out LED(5);
 
 class State
 {
@@ -86,6 +90,7 @@ public:
 };
 
 // THE FUNCTIONS FOR CONTROLLING
+
 // RESET
 void Initialize::Reset()
 {
@@ -108,6 +113,8 @@ void Operational::Reset()
 // ENTRY
 void Initialize::Entry()
 {
+  // OPERATIONS TO HAPPEN IN STATE GO HERE!
+  LED.set_lo();
   Serial.println("Entry: Initialize");
   for (int i = 0; i < 4; i++)
   {
@@ -119,16 +126,21 @@ void Initialize::Entry()
 
 void PreOperational::Entry()
 {
+  // OPERATIONS TO HAPPEN IN STATE GO HERE!
   Serial.println("Entry: Pre-Operational");
   Serial.println("Waiting for user input to start!");
   while (!Serial.available())
   {
+    LED.toggle();
+    _delay_ms(500);
   }
   this->context_->TransitionTo(new Operational);
 }
 
 void Operational::Entry()
 {
+  // OPERATIONS TO HAPPEN IN STATE GO HERE!
+  LED.set_hi();
   Serial.println("Entry: Operational");
   _delay_ms(5);
 }
