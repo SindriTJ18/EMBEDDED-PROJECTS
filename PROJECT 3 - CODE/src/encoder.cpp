@@ -18,7 +18,7 @@ Encoder::Encoder()
     EIMSK |= (1 << INT0);
     // outputPin.init();
     // outputPin.set_hi(); //Enable interrupt on PCINT0
-    sei(); //Enable interrupts
+    // sei(); //Enable interrupts
 }
 
 int Encoder::count()
@@ -57,7 +57,7 @@ ISR(INT0_vect)
     }
 }
 
-// TIMER 1 INTERRUPT
+// // TIMER 1 INTERRUPT
 ISR(TIMER1_COMPA_vect)
 {
     // outputPin.set_hi();
@@ -68,10 +68,10 @@ ISR(TIMER1_COMPA_vect)
     speed_ratio = ENCODER_SPEED / 2400.0;
     // OCR1B = (ADCH / 255.0) * ((16000 / 1024.0) * 10.0 - 1);
     ENCODER_COUNT = 0;
+    // Serial.println("DOGS1");
 }
-/*
+
 ISR(TIMER1_COMPB_vect)
 {
-    // outputPin.set_lo();
+    // Serial.println("FOKOF");
 }
-*/

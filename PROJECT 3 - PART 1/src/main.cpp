@@ -129,7 +129,7 @@ void Operational::Reset()
 // ENTRY
 void Initialize::Entry()
 {
-  //cli();
+  cli();
   // OPERATIONS TO HAPPEN IN STATE GO HERE!
   LED.init();
   drivePin.init();
@@ -178,34 +178,6 @@ void Operational::Entry()
 // INITIALIZE THE STATE AS RED
 Context *context;
 
-/*
-void loop()
-{
-  // INPUT REQUESTS INTO SERIAL
-  if (Serial.available() > 0)
-  {
-    command = Serial.read();
-    switch (command)
-    {
-    case 's':
-    {
-      Serial.println("Start command.");
-      Context *context = new Context(new Initialize);
-      break;
-    }
-    // GERIR EKKERT EINS OG ER
-    case 'r':
-    {
-      Serial.println("Reset command.");
-      _delay_ms(100);
-      // NÆ EKKI AÐ CALLA REQUEST THROWAR ERROR, POTTÞETT POINTER BULL I CONTEXT
-      context->ResetRequest();
-      break;
-    }
-    }
-  }
-}
-*/
 int main()
 {
   init();
@@ -237,5 +209,5 @@ int main()
     }
   }
 
-  return 550;
+  return 0;
 }
