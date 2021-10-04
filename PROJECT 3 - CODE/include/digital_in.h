@@ -5,15 +5,14 @@
 
 class Digital_in
 {
-    public:
-
+public:
     Digital_in(int pinNumber, char port);
     void init();
+    void enablePullup();
     bool is_hi();
     bool is_lo();
 
-    private:
-
+private:
     uint8_t pinMask;
     char portChar;
 };
