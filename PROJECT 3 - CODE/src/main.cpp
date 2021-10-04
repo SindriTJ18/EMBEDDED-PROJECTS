@@ -2,6 +2,12 @@
 #include <util/delay.h>
 #include <avr/io.h>
 #include <digital_out.h>
+#include <digital_in.h>
+#include <encoder.h>
+#include <timer0_ms.h>
+#include <timer1_ms.h>
+#include <p_controller.h>
+#include <analog_in.h>
 
 void setup()
 {
@@ -11,7 +17,12 @@ void setup()
 // GLOBAL INITS
 char command;
 class Context;
+
 Digital_out LED(5);
+Digital_out drivePin(1);
+Analog_in analogPin(3);
+Encoder encoder;
+Timer1_ms timer1(10);
 
 class State
 {
@@ -114,12 +125,12 @@ void Operational::Reset()
 void Initialize::Entry()
 {
   // OPERATIONS TO HAPPEN IN STATE GO HERE!
+  LED.init();
+  drivePin.init();
   LED.set_lo();
-  Serial.println("Entry: Initialize");
-  for (int i = 0; i < 4; i++)
-  {
-    Serial.println("Initializing..");
-  }
+  drivePin.set_lo();
+
+  Serial.println("Entry: Initialized!");
   _delay_ms(5);
   this->context_->TransitionTo(new PreOperational);
 }
@@ -139,10 +150,16 @@ void PreOperational::Entry()
 
 void Operational::Entry()
 {
-  // OPERATIONS TO HAPPEN IN STATE GO HERE!
-  LED.set_hi();
+  drivePin.set_hi();
   Serial.println("Entry: Operational");
-  _delay_ms(5);
+  //timer1.init();
+  // OPERATIONS TO HAPPEN IN STATE GO HERE!
+  while (1)
+  {
+    LED.set_hi();
+    Serial.print("Analog value: ");
+    Serial.println(analogPin.sample());
+  }
 }
 
 // INITIALIZE THE STATE AS RED
