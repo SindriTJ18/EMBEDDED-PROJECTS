@@ -1,4 +1,4 @@
-#include "digital_out.h"
+#include <digital_out.h>
 #include <stdint.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -26,4 +26,10 @@ void Digital_out::set_lo()
 void Digital_out::toggle()
 {
     PORTB ^= pinMask;
+}
+
+void Digital_out::switchPin(int pin)
+{
+    set_lo();
+    pinMask = 1 << pin;
 }

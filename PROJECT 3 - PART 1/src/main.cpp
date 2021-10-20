@@ -6,9 +6,8 @@
 #include <encoder.h>
 #include <timer0_ms.h>
 #include <timer1_ms.h>
-// #include <p_controller.h>
+#include <p_controller.h>
 #include <analog_in.h>
-#include "controller.h"
 /*
 void setup()
 {
@@ -28,11 +27,7 @@ Digital_out LED(5);
 Digital_out drivePin(1);
 Analog_in analogPin(3);
 Encoder encoder;
-Timer1_ms timer1(4);
-Digital_in fltPin(3, 'B');
-PI_controller piController = PI_controller(1, 1.5);
-Timer0_ms timer0(0);
-Digital_out nonDrivePin(2);
+Timer1_ms timer1(100);
 
 class State
 {
@@ -110,13 +105,6 @@ public:
   void Entry() override;
 };
 
-class Stopped : public State
-{
-public:
-  void Reset() override;
-
-  void Entry() override;
-};
 // THE FUNCTIONS FOR CONTROLLING
 
 // RESET
@@ -138,27 +126,15 @@ void Operational::Reset()
   this->context_->TransitionTo(new Initialize);
 }
 
-void Stopped::Reset()
-{
-  Serial.println("Reset: Reset the machine");
-  this->context_->TransitionTo(new Initialize);
-}
-
 // ENTRY
 void Initialize::Entry()
 {
-  //cli();
+  cli();
   // OPERATIONS TO HAPPEN IN STATE GO HERE!
   LED.init();
   drivePin.init();
   LED.set_lo();
   drivePin.set_lo();
-  fltPin.init();
-  fltPin.enablePullup();
-  encoder.init();
-  timer0.init();
-  timer1.init();
-  nonDrivePin.init();
 
   Serial.println("Entry: Initialized!");
   _delay_ms(5);
@@ -182,7 +158,7 @@ void Operational::Entry()
 {
 
   _delay_ms(100);
-  LED.set_hi();
+  LED.set_lo();
   drivePin.set_hi();
   Serial.println("Entry: Operational");
   _delay_ms(100);
@@ -190,32 +166,15 @@ void Operational::Entry()
   // LED.set_hi();
   timer1.init();
   // OPERATIONS TO HAPPEN IN STATE GO HERE!
-  int u;
   sei();
-  while (fltPin.is_hi())
+  while (1)
   {
-    // Serial.print("Analog value: ");
+    LED.set_hi();
+    Serial.print("Analog value: ");
     Serial.println(analogPin.sample());
-    // Serial.print("Encoder value:");
-    // Serial.println(encoder.pps());
-    u = piController.update(analogPin.sample(), encoder.pps());
-    piController.control(u);
-    // Serial.println(u);
-    _delay_ms(4);
   }
-  this->context_->TransitionTo(new Stopped);
 }
 
-void Stopped::Entry()
-{
-  drivePin.set_lo();
-  while (fltPin.is_lo())
-  {
-    LED.toggle();
-    _delay_ms(250);
-  }
-  this->context_->TransitionTo(new PreOperational);
-}
 // INITIALIZE THE STATE AS RED
 Context *context;
 
@@ -250,15 +209,5 @@ int main()
     }
   }
 
-  return 550;
-}
-
-ISR(TIMER0_COMPA_vect)
-{
-  drivePin.set_hi();
-}
-
-ISR(TIMER0_COMPB_vect)
-{
-  drivePin.set_lo();
+  return 0;
 }

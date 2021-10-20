@@ -17,12 +17,12 @@ void Digital_in::init()
         PORTB &= ~pinMask;
         break;
     case 'C':
-        DDRC &= ~pinMask;
-        PORTC &= ~pinMask;
+        DDRC |= pinMask;
+        PORTC |= pinMask;
         break;
     case 'D':
-        DDRD &= ~pinMask;
-        PORTD &= ~pinMask;
+        DDRD |= pinMask;
+        PORTD |= pinMask;
         break;
     }
 }
@@ -52,27 +52,9 @@ bool Digital_in::is_hi()
     return false;
 }
 
-bool Digital_in::is_hi_d()
-{
-    if (PIND & pinMask)
-    {
-        return true;
-    }
-    return false;
-}
-
 bool Digital_in::is_lo()
 {
     if (PINB & pinMask)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool Digital_in::is_lo_d()
-{
-    if (PIND & pinMask)
     {
         return false;
     }

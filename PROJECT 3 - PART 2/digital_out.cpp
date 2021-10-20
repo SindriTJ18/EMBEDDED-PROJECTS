@@ -27,9 +27,3 @@ void Digital_out::toggle()
 {
     PORTB ^= pinMask;
 }
-
-void Digital_out::switchPin(int pin)
-{
-    set_lo();
-    pinMask = 1 << pin;
-}

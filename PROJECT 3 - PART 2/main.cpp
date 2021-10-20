@@ -6,9 +6,8 @@
 #include <encoder.h>
 #include <timer0_ms.h>
 #include <timer1_ms.h>
-// #include <p_controller.h>
+#include <p_controller.h>
 #include <analog_in.h>
-#include "controller.h"
 /*
 void setup()
 {
@@ -28,11 +27,8 @@ Digital_out LED(5);
 Digital_out drivePin(1);
 Analog_in analogPin(3);
 Encoder encoder;
-Timer1_ms timer1(4);
+Timer1_ms timer1(100);
 Digital_in fltPin(3, 'B');
-PI_controller piController = PI_controller(1, 1.5);
-Timer0_ms timer0(0);
-Digital_out nonDrivePin(2);
 
 class State
 {
@@ -155,10 +151,6 @@ void Initialize::Entry()
   drivePin.set_lo();
   fltPin.init();
   fltPin.enablePullup();
-  encoder.init();
-  timer0.init();
-  timer1.init();
-  nonDrivePin.init();
 
   Serial.println("Entry: Initialized!");
   _delay_ms(5);
@@ -190,18 +182,11 @@ void Operational::Entry()
   // LED.set_hi();
   timer1.init();
   // OPERATIONS TO HAPPEN IN STATE GO HERE!
-  int u;
   sei();
   while (fltPin.is_hi())
   {
-    // Serial.print("Analog value: ");
+    Serial.print("Analog value: ");
     Serial.println(analogPin.sample());
-    // Serial.print("Encoder value:");
-    // Serial.println(encoder.pps());
-    u = piController.update(analogPin.sample(), encoder.pps());
-    piController.control(u);
-    // Serial.println(u);
-    _delay_ms(4);
   }
   this->context_->TransitionTo(new Stopped);
 }
@@ -251,14 +236,4 @@ int main()
   }
 
   return 550;
-}
-
-ISR(TIMER0_COMPA_vect)
-{
-  drivePin.set_hi();
-}
-
-ISR(TIMER0_COMPB_vect)
-{
-  drivePin.set_lo();
 }
