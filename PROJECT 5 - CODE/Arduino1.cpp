@@ -1,5 +1,12 @@
 /* Arduino Serial Command Processor */
 #include <Arduino.h>
+#include <Servo.h>
+
+uint16_t ModRTU_CRC(uint8_t buf[], int len);
+void ModRTU_write(char *buf);
+void ModRTU_read(char *buf);
+void printBuffer(char buf[], int len);
+void fsm(uint8_t state);
 
 #define SET_OP 0x01
 #define STOP_NODE 0x02
@@ -7,21 +14,18 @@
 #define RESET_NODE 0x81
 #define RESET_COMMS 0x82
 
-uint16_t ModRTU_CRC(uint8_t buf[], int len);
-void ModRTU_write(char *buf);
-void ModRTU_read(char *buf);
-void printBuffer(char buf[], int len);
-
-const unsigned char ADDR = 0x02;
+const unsigned char ADDR = 0x01;
 const unsigned char READ_FUNC = 0x03;
 const unsigned char WRITE_FUNC = 0x06;
-uint16_t *reg;
+
+uint16_t reg[16];
 uint8_t lastState = 0x00;
+Servo myservo;
+int analogPin = A6;
 
 void setup()
 { // called once on start up
   // A baud rate of 115200 (8-bit with No parity and 1 stop bit)
-  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200, SERIAL_8N1);
 }
 
@@ -59,29 +63,7 @@ void loop()
       }
     }
   }
-  switch (reg[0])
-  {
-  case SET_OP:
-    digitalWrite(LED_BUILTIN, HIGH);
-    lastState = SET_OP;
-    break;
-  case STOP_NODE:
-    digitalWrite(LED_BUILTIN, LOW);
-    lastState = STOP_NODE;
-    break;
-  case SET_PREOP:
-
-    lastState = SET_OP;
-    break;
-  case RESET_NODE:
-
-    lastState = RESET_NODE;
-    break;
-  case RESET_COMMS:
-
-    lastState = RESET_NODE;
-    break;
-  }
+  fsm(reg[0]);
 }
 
 uint16_t ModRTU_CRC(uint8_t buf[], int len)
@@ -104,7 +86,6 @@ uint16_t ModRTU_CRC(uint8_t buf[], int len)
   } //Note, this number has low and high bytes swapped, souse it accordingly(or swap bytes)
   return crc;
 }
-
 void ModRTU_write(char *buf)
 {
   // uint8_t msbyte = atoi(buf[4]);
@@ -118,7 +99,6 @@ void ModRTU_write(char *buf)
   // Serial.print(buf[i]);
   // }
 }
-
 void ModRTU_read(char *buf)
 {
   uint8_t regIndex = buf[3];
@@ -142,11 +122,39 @@ void ModRTU_read(char *buf)
 
   // printBuffer(buf, 8);
 }
-
 void printBuffer(char buf[], int len)
 {
   for (int i = 0; i < len; i++)
   {
     Serial.print(buf[i]);
   }
+}
+void fsm(uint8_t state)
+{
+  switch (state)
+  {
+  case SET_OP:
+    myservo.write(uint8_t(reg[1]));
+    reg[2] = analogRead(analogPin);
+    break;
+  case STOP_NODE:
+    break;
+  case SET_PREOP:
+    if (lastState != SET_PREOP)
+    {
+      myservo.attach(9);
+    }
+    break;
+  case RESET_NODE:
+
+    break;
+  case RESET_COMMS:
+
+    break;
+  default:
+    break;
+  }
+}
+void servoOp()
+{
 }
