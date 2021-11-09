@@ -14,11 +14,12 @@ void fsm(uint8_t state);
 #define RESET_NODE 0x81
 #define RESET_COMMS 0x82
 
-const unsigned char ADDR = 0x01;
+const unsigned char ADDR = 0x02;
 const unsigned char READ_FUNC = 0x03;
 const unsigned char WRITE_FUNC = 0x06;
+const uint8_t REG_SIZE = 0x10;
 
-uint16_t reg[16];
+uint16_t reg[REG_SIZE];
 uint8_t lastState = 0x00;
 Servo myservo;
 int analogPin = A6;
@@ -49,16 +50,24 @@ void loop()
     {
       if (buf[0] == ADDR)
       {
-        switch (buf[1])
-        {
-        case READ_FUNC:
-          ModRTU_read(buf);
-          break;
-        case WRITE_FUNC:
-          ModRTU_write(buf);
-          break;
-        default:
-          break;
+        if (buf[3] >= REG_SIZE){
+          buf[1] += 0x80;
+          printBuffer(buf, len);
+        }
+        else{
+          switch (buf[1])
+          {
+          case READ_FUNC:
+            ModRTU_read(buf);
+            break;
+          case WRITE_FUNC:
+            ModRTU_write(buf);
+            break;
+          default:
+            buf[1] += 0x80;
+            printBuffer(buf, len);
+            break;
+          }
         }
       }
     }
@@ -86,6 +95,7 @@ uint16_t ModRTU_CRC(uint8_t buf[], int len)
   } //Note, this number has low and high bytes swapped, souse it accordingly(or swap bytes)
   return crc;
 }
+
 void ModRTU_write(char *buf)
 {
   // uint8_t msbyte = atoi(buf[4]);
@@ -136,6 +146,7 @@ void fsm(uint8_t state)
   case SET_OP:
     myservo.write(uint8_t(reg[1]));
     reg[2] = analogRead(analogPin);
+    reg[2] = map(reg[2], 0, 1023, 60, 125);
     break;
   case STOP_NODE:
     break;
